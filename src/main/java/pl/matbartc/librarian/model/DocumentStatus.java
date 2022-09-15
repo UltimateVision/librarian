@@ -1,5 +1,5 @@
 package pl.matbartc.librarian.model;
 
 public enum DocumentStatus {
-    NEW, DOWNLOADING, OK
+    NEW, NOT_READY, READY, ERROR,
 }

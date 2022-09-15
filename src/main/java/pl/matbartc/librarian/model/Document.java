@@ -29,6 +29,8 @@ public class Document {
     @Lob
     private byte[] data;
 
+    private String contentType;
+
     @Column(nullable = false)
     private LocalDateTime createdDate;
 

@@ -10,5 +10,7 @@ public class DocumentDTO implements Serializable {
 
     private String id;
     private DocumentStatus status;
+    private byte[] data;
+    private String contentType;
 
 }
