@@ -5,7 +5,7 @@ import lombok.Data;
 import java.io.Serializable;
 
 @Data
-public class DownloadDocumentDTO implements Serializable {
+public class ScheduleDocumentDownloadRequest implements Serializable {
 
     private String url;
 

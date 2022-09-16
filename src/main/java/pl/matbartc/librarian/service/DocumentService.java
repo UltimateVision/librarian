@@ -1,54 +1,39 @@
 package pl.matbartc.librarian.service;
 
-import static org.asynchttpclient.Dsl.*;
-
-import org.asynchttpclient.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import pl.matbartc.librarian.model.Document;
+import org.springframework.stereotype.Service;
+import pl.matbartc.librarian.exceptions.UnknownDocumentException;
+import pl.matbartc.librarian.model.entities.Document;
 import pl.matbartc.librarian.model.DocumentStatus;
-import pl.matbartc.librarian.repo.DocumentsRepository;
+import pl.matbartc.librarian.storage.DocumentStorage;
 
-import java.util.Optional;
 import java.util.UUID;
 
-@Component
+@Service
 public class DocumentService {
 
-    final AsyncHttpClient asyncHttpClient = asyncHttpClient();
+    @Autowired
+    private DocumentDownloader documentDownloader;
 
     @Autowired
-    DocumentsRepository repository;
+    private DocumentStatusReporter documentStatusReporter;
+
+    @Autowired
+    private DocumentStorage storage;
 
     public Document scheduleDownload(String source) {
-        Document document = new Document();
-        document.setSource(source);
-
-        document = repository.save(document);
-
-        final UUID id = document.getId();
-
-        asyncHttpClient.prepareGet(source).execute(new AsyncCompletionHandler<Void>() {
-            @Override
-            public Void onCompleted(Response response) throws Exception {
-                final Document d = repository.findById(id).orElseThrow(); // FIXME
-                d.setData(response.getResponseBodyAsBytes());
-                d.setContentType(response.getContentType());
-                d.setStatus(DocumentStatus.READY);
-                repository.save(d);
-
-                return null;
-            }
-        });
-
+        Document document = storage.create(source);
+        if (document.getStatus() == DocumentStatus.NEW) {
+            documentDownloader.schedule(document);
+        }
         return document;
     }
 
-    public Optional<DocumentStatus> getDocumentStatus(UUID uuid) {
-        return repository.findById(uuid).map(Document::getStatus);
+    public DocumentStatus getDocumentStatus(UUID documentId) {
+        return documentStatusReporter.getStatus(documentId);
     }
 
-    public Optional<Document> getDocument(UUID uuid) {
-        return repository.findById(uuid);
+    public Document getDocument(UUID documentId) {
+        return storage.fetch(documentId).orElseThrow(() -> new UnknownDocumentException(documentId));
     }
 }

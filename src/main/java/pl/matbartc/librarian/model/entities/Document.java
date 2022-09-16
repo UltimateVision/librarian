@@ -1,7 +1,8 @@
-package pl.matbartc.librarian.model;
+package pl.matbartc.librarian.model.entities;
 
 import lombok.Data;
 import org.hibernate.annotations.Type;
+import pl.matbartc.librarian.model.DocumentStatus;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -27,7 +28,7 @@ public class Document {
     private DocumentStatus status = DocumentStatus.NEW;
 
     @Lob
-    private byte[] data;
+    private byte[] content;
 
     private String contentType;
 
