@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import pl.matbartc.librarian.model.entities.Document;
 import pl.matbartc.librarian.service.DocumentDownloader;
 import pl.matbartc.librarian.service.DocumentStatusReporter;
+import pl.matbartc.librarian.service.DownloadExecutor;
 import pl.matbartc.librarian.storage.DocumentStorage;
 
 import javax.annotation.PostConstruct;
@@ -23,24 +24,28 @@ public class AsyncDocumentDownloader implements DocumentDownloader {
 
     private DocumentStatusReporter documentStatusReporter;
 
+    private DownloadExecutor downloadExecutor;
+
     @Autowired
     public AsyncDocumentDownloader(
             @Value("${librarian.downloaderPoolSize:1}") int executorPoolSize,
             DocumentStorage storage,
-            DocumentStatusReporter documentStatusReporter
+            DocumentStatusReporter documentStatusReporter,
+            DownloadExecutor downloadExecutor
     ) {
         executorService = Executors.newFixedThreadPool(executorPoolSize);
         this.storage = storage;
         this.documentStatusReporter = documentStatusReporter;
+        this.downloadExecutor = downloadExecutor;
     }
 
     @PostConstruct
     public void init() {
-        executorService.submit(new DownloadWorker(storage, documentStatusReporter, documentQueue));
+        executorService.submit(new RunnableDownloadProcessor(storage, documentStatusReporter, downloadExecutor, documentQueue));
     }
 
     @Override
-    public void schedule(Document document) {
+    public void scheduleDownload(Document document) {
         documentQueue.add(document);
     }
 }

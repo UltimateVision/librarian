@@ -24,7 +24,7 @@ public class DocumentService {
     public Document scheduleDownload(String source) {
         Document document = storage.create(source);
         if (document.getStatus() == DocumentStatus.NEW) {
-            documentDownloader.schedule(document);
+            documentDownloader.scheduleDownload(document);
         }
         return document;
     }

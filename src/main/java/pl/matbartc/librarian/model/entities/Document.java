@@ -10,18 +10,19 @@ import java.util.UUID;
 
 @Data
 @Entity
+@Table(uniqueConstraints = {
+        @UniqueConstraint(name = "UK_SOURCE", columnNames = {"source"})
+})
 public class Document {
 
     @Id
     @Column(name = "id", nullable = false)
-    @Type(type="org.hibernate.type.UUIDCharType")
+    @Type(type = "org.hibernate.type.UUIDCharType")
     @GeneratedValue
     private UUID id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String source;
-
-    private String name;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
